@@ -1,0 +1,46 @@
+version: "3"
+
+services:
+  postgis:
+    # This is POSTGIS="3.1.4 ded6c34" from Debian Stable, which is too old
+    # for me: I want to test a bug:
+    #image: camptocamp/postgres:13-postgis-3
+    # https://registry.hub.docker.com/r/postgis/postgis/tags?page=1&name=13-
+    # Even this is too stable, we go directly on master:
+    # image: postgis/postgis:13-3.2-alpine
+    # POSTGIS="3.3.0dev 3.2.0-398-g4fa57df0b" [EXTENSION] PGSQL="130" GEOS="3.11.0dev-CAPI-1.16.0" PROJ="8.2.0" LIBXML="2.9.10" LIBJSON="0.15" LIBPROTOBUF="1.3.3" WAGYU="0.5.0 (Internal)" (core procs from "3.1.4 ded6c34" need upgrade)
+    image: postgis/postgis:13-master
+    environment:
+      # postgres is the default, explicitly define it anyways:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - postgis_data:/var/lib/postgresql/data
+      - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+
+    ports:
+      - "54320:5432"
+    restart: "no"
+    networks:
+      - fossgis2022
+
+  # geoserver:
+  #   image: kartoza/geoserver:2.20.1
+  #   environment:
+  #     - EXISTING_DATA_DIR=true
+  #     - GEOSERVER_DATA_DIR=/mnt/geoserver_datadir
+  #     - STABLE_EXTENSIONS=css
+  #   volumes:
+  #     - ./data/geoserver_datadir:/mnt/geoserver_datadir
+  #   ports:
+  #     - "8080:8080"
+  #   restart: "no"
+  #   networks:
+  #     - fossgis2022
+
+networks:
+  fossgis2022:
+    driver: bridge
+volumes:
+  postgis_data:
+  geoserver_datadir:
